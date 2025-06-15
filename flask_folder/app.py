@@ -41,19 +41,7 @@ def menu():
         elif option == "4":
             return "Exiting the program."
 
-    return render_template("menu.html", data=data)
-
-
-# @app.route('/login', methods=['POST', 'GET'])
-# def login():
-#     if request.method == "POST":
-#         return redirect(url_for('user', usr=request.form['nm']))
-#     else: 
-#         return render_template('login.html')
-
-# @app.route('/<usr>')
-# def user(usr):
-#     return f'<h1>Hello, {usr}!</h1>'
+    return render_template("menu.html", data=data, curr_year=datetime.now().year)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)  # Run the Flask app on port 5000
