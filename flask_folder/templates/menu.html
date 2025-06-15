@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <meta charset="UTF-8">
+    <title>CarGet Motors Appointments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            text-align: center;
+            background-color: #0a0a0a;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+            text-align: left;
+        }
+        #date-container {
+            display: none; /* Initially hidden */
+        }
+        .transparent-button {background: none;
+        border: none;
+        border-radius: 5px;
+        outline: 1.5px solid rgb(3, 3, 3);
+        box-shadow: none;
+        padding: 5px;
+        cursor: pointer; /* Adds a pointer effect */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Welcome to CarGet Motors Calendar</h1>
+        
+        <form method="POST" action="/menu" onsubmit="showCopyButton()">
+            <label for="option">Choose an option:</label>
+            <select name="option" id="option" onchange="toggleDateInput()">
+                <option value="1">View today's appointments</option>
+                <option value="2">View tomorrow's appointments</option>
+                <option value="3">View appointments for a specific date</option>
+                <option value="4">Exit</option>
+            </select>
+
+            <div id="date-container">
+                <label for="date">Enter a date (MM-DD):</label>
+                <input type="text" name="date" id="date" placeholder="MM-DD">
+            </div>
+
+            <input type="submit" value="Submit">
+        </form>
+
+        {% if data %}
+            <div id="textToCopy">{{ data | safe }}</div> <!-- Ensures correct HTML rendering -->
+        {% endif %}           
+
+
+        <script>
+            function toggleDateInput() {
+                var option = document.getElementById("option").value;
+                var dateField = document.getElementById("date-container");
+
+                if (option === "3") {
+                    dateField.style.display = "block"; // Show when option 3 is selected
+                } else {
+                    dateField.style.display = "none";  // Hide otherwise
+                }
+            }
+
+            function showCopyButton() {
+                document.getElementById("copyButton").style.display = "block"; // Show copy button after submit
+            }
+
+            function copyText() {
+                var textToCopy = document.getElementById("textToCopy").innerText;
+                navigator.clipboard.writeText(textToCopy).then(function() {
+                    alert("Text copied to clipboard!");
+                }).catch(function(err) {
+                    console.error("Could not copy text: ", err);
+                });
+            }
+        </script>
+    </div>
+
+</body>
+</html>
