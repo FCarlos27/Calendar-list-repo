@@ -182,6 +182,7 @@ def create_list(json_file, option, date_input = ""):
             </button>
         </div>
         <ul>
+        <br>
         """
     i = 0
     for event in json_file["events"]:
