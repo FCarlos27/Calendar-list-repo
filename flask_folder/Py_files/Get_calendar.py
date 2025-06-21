@@ -130,7 +130,6 @@ def tokens():
     json_file = Get_gist.get_json_gist()  # Get the gist file content
     return Get_gist.retrieve_tks_json(json_file)  # Retrieve tokens from the gist file
 
-
 def get_calendar_events(start_time, end_time, token):
     # Function to get calendar events from the GHL API
     url = "https://services.leadconnectorhq.com/calendars/events"

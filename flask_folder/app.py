@@ -1,7 +1,5 @@
 from flask import Flask, request, render_template
 from datetime import datetime
-from Py_files.GHL_Auth import get_access_token
-from Py_files.Get_gist import get_json_gist, update_tks_in_gist, retrieve_tks_json 
 from Py_files.Get_calendar import get_calendar_events, set_start_and_end_time, create_list, tokens
 
 app = Flask(__name__)
