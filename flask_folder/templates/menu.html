@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 16px;
+            font-size: 14px;
             margin: 20px;
             padding: 20px;
             text-align: center;
@@ -22,71 +22,86 @@
             text-align: left;
         }
         #date-container {
-            display: none; /* Initially hidden */
+            display: none;
         }
-        .transparent-button {background: none;
-        border: none;
-        border-radius: 5px;
-        outline: 1.5px solid rgb(3, 3, 3);
-        box-shadow: none;
-        padding: 5px;
-        cursor: pointer; /* Adds a pointer effect */
+        .transparent-button {
+            background: none;
+            border: none;
+            border-radius: 5px;
+            outline: 1.5px solid rgb(3, 3, 3);
+            box-shadow: none;
+            padding: 5px;
+            cursor: pointer;
+        }
+        .sr-only{
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Welcome to CarGet Motors Calendar</h1>
-        
-        <form method="POST" action="/menu" onsubmit="showCopyButton()">
-            <label for="option">Choose an option:</label>
-            <select name="option" id="option" onchange="toggleDateInput()">
-                <option value="1">View today's appointments</option>
-                <option value="2">View tomorrow's appointments</option>
-                <option value="3">View appointments for a specific date</option>
-                <option value="4">Exit</option>
-            </select>
+<div class="container">
+    <h1>Welcome to CarGet Motors Calendar</h1>
 
-            <div id="date-container">
-                <label for="date">Enter a date (MM-DD):</label>
-                <input type="text" name="date" id="date" placeholder= "MM-DD-{{ curr_year }}">
-            </div>
+    <form method="POST" action="/menu" id="menuForm">
+        <label for="option">Choose an option:</label>
+        <select name="option" id="option" onchange="toggleDateInput()">
+            <option value="1">View today's appointments</option>
+            <option value="2">View tomorrow's appointments</option>
+            <option value="3">View appointments for a specific date</option>
+            <option value="4">Exit</option>
+        </select>
 
-            <input type="submit" value="Submit">
-        </form>
+        <div id="date-container">
+            <label for="date">Enter a date (MM-DD):</label>
+            <input type="text" name="date" id="date" placeholder="MM-DD-{{ curr_year }}">
+        </div>
 
+        <input type="submit" value="Submit">
+    </form>
+
+    <div style='display: flex; align-items: center; justify-content: space-between;'>
+         <h2 id="visualTitle">{{ title }}</h2>
         {% if data %}
-            <div id="textToCopy">{{ data | safe }}</div> <!-- Ensures correct HTML rendering -->
-        {% endif %}           
-
-
-        <script>
-            function toggleDateInput() {
-                var option = document.getElementById("option").value;
-                var dateField = document.getElementById("date-container");
-
-                if (option === "3") {
-                    dateField.style.display = "block"; // Show when option 3 is selected
-                } else {
-                    dateField.style.display = "none";  // Hide otherwise
-                }
-            }
-
-            function showCopyButton() {
-                document.getElementById("copyButton").style.display = "block"; // Show copy button after submit
-            }
-
-            function copyText() {
-                var textToCopy = document.getElementById("textToCopy").innerText;
-                navigator.clipboard.writeText(textToCopy).then(function() {
-                    alert("Text copied to clipboard!");
-                }).catch(function(err) {
-                    console.error("Could not copy text: ", err);
-                });
-            }
-        </script>
+        <button id='copyButton' onclick='copyText()' class="transparent-button" style="display: inline-block;">
+            <i class="bi bi-clipboard" style="color: black; font-size: 18px;"></i>
+        </button>
+        {% endif %}
     </div>
+
+    <br>
+
+    {% if data %}
+    <div id="textToCopy">
+        <span class="sr-only">{{ title }}</span><br>
+        {{ data | safe }}
+    </div>
+    {% endif %}
+
+    <script>
+        function toggleDateInput() {
+            var option = document.getElementById("option").value;
+            var dateField = document.getElementById("date-container");
+            dateField.style.display = (option === "3") ? "block" : "none";
+        }
+
+        function copyText() {
+            var textToCopy = document.getElementById("textToCopy").innerText;
+            navigator.clipboard.writeText(textToCopy).then(function () {
+                alert("Text copied to clipboard!");
+            }).catch(function (err) {
+                console.error("Could not copy text: ", err);
+            });
+        }
+    </script>
+</div>
 
 </body>
 </html>

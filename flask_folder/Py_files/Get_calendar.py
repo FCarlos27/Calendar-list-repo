@@ -155,43 +155,62 @@ def get_calendar_events(start_time, end_time, token):
 
     return response.json() # GHL retrieves the events in JSON format
 
+def format_booking():
+    pattern = re.compile(r"""
+    NEW\ APPOINTMENT
+    | RESCHEDULE
+    |   (?P<booked>BOOKED\ FOR
+        (?:\s+\w+)*                       # Optional date/day text
+        \s+at\s+
+        (?P<hour>\d{1,2})                 # Hour
+        (?:[.:](?P<minute>\d{2}))?        # Optional minutes
+        \s*(?P<meridian>[APMapm]{0,2})    # AM or PM
+    )
+    """, re.IGNORECASE | re.VERBOSE)
+
+    
+    def replacement(match):
+        # Skip if it's not a 'BOOKED FOR' line
+        if not match.group("booked"):
+            return ""
+        
+        # Handle 'noon' specifically
+        if "noon" in match.group(0).lower():
+            return "*BOOKED FOR TODAY AT 12:00 PM📌*"
+
+        # Extract and sanitize components
+        hour_str = match.group("hour")
+        if hour_str is None:
+            return ""
+
+        hour = int(hour_str)
+        minute = match.group("minute") or "00"
+        meridian = match.group("meridian").upper() if match.group("meridian") else ""
+
+        # Normalize format
+        formatted = f"BOOKED FOR TODAY AT {hour}:{minute.zfill(2)} {meridian}"
+
+        return f"*{formatted}📌*"
+    
+    return pattern, replacement
+
+
 def create_list(json_file, option, date_input = ""):
     
-    pattern = r"\*?\*?NEW APPOINTMENT\*?\*?|\*?RESCHEDULE\*?|\*?(BOOKED FOR)\s+\w+(\s+AT\s+)(\d+)\.(\d+)([APM]*)"
-    replacement = lambda match: (
-        f"*BOOKED FOR TODAY{match.group(2)}{match.group(3)}:{match.group(4)}*"
-        if match.group(1) else ""  # Remove "NEW APPOINTMENT" & "RESCHEDULE"
-    )
+    appointments_html = ""
+    pattern, replacement = format_booking()
 
-    if option == 1:
-        title = "CarGet Motors Appointments for Today"
-    elif option == 2:
-        title = "CarGet Motors Appointments for Tomorrow"
-    else:
-        title = f"CarGet Motors Appointments for {date_input}"
-    
-    appointments_html = f"""
-        <div style='display: flex; align-items: center; justify-content: space-between;'>
-            <h2>{title}
-            </h2>
-            <button id='copyButton' onclick='copyText()' class="transparent-button">
-                <i class="bi bi-clipboard" 
-                style="color: black; font-size: 18px;">
-                </i>
-            </button>
-        </div>
-        <ul>
-        <br>
-        """
+    # Creates the list in HTML format
     i = 0
     for event in json_file["events"]:
         if event["appointmentStatus"] in ["confirmed", "showed"]:
             i += 1
-            if event["notes"] == "":
+            if event["notes"].strip() == "":
                 appointments_html += f"{i}. <li-style-type: none>Appointment's description is empty.</li><br><br>"
             else:
-                description = re.sub(pattern, replacement, event["notes"]).strip()
-                description = description.replace("\n", "<br>") # Replace newlines with <br> for HTML formatting
+                clean_notes = re.sub(r"[*📌]", "", event["notes"])
+                description = re.sub(pattern, replacement, clean_notes).strip()
+                description = description.replace("\n", "<br>") 
                 appointments_html += f"<li-style-type: none>{i}. {description}</li><br><br>"
             
             if event["appointmentStatus"] == "showed" and option == 1:

@@ -9,17 +9,20 @@ app = Flask(__name__)
 def menu():
     data = None
     auth_token = tokens()[0]  # Get access token
+    title = ""
 
     if request.method == 'POST':
         option = request.form.get('option')
         date_input = request.form.get('date', "")
 
         if option == "1":
+            title = "CarGet Motors Appointments for Today"
             start_time, end_time = set_start_and_end_time(1)
             json_file = get_calendar_events(start_time, end_time, auth_token)
             data = create_list(json_file, 1)
 
         elif option == "2":
+            title = "CarGet Motors Appointments for Tomorrow"
             start_time, end_time = set_start_and_end_time(2)
             json_file = get_calendar_events(start_time, end_time, auth_token)
             data = create_list(json_file, 2)
@@ -31,6 +34,7 @@ def menu():
             try:
                 datetime.strptime(formatted_date, "%Y-%m-%d")  # Validate date format
                 start_time, end_time = set_start_and_end_time(3, formatted_date)
+                title = f"CarGet Motors Appointments for {date_input}"
                 json_file = get_calendar_events(start_time, end_time, auth_token)
                 data = create_list(json_file, 3, formatted_date)
             except ValueError:
@@ -39,7 +43,7 @@ def menu():
         elif option == "4":
             return "Exiting the program."
 
-    return render_template("menu.html", data=data, curr_year=datetime.now().year)
+    return render_template("menu.html", data=data, curr_year=datetime.now().year, title=title)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)  # Run the Flask app on port 5000
